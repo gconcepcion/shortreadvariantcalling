@@ -6,18 +6,16 @@ configfile: "config.yaml"            # config options
 
 reffasta = config['ref']['fasta']
 sample = config['sample']
-print("Reference: {r}".format(r=reffasta))
-print("Sample: {s}".format(s=sample))
+print(f"Reference: {reffasta}")
+print(f"Sample: {sample}")
 
-
-#ipattern = re.compile(r'samples/(?P<sample>[A-Za-z0-9_-]+)/aligned/(?P<movie>m\d{5}U?e?_\d{6}_\d{6})\.(?P<reference>.*).bam')
-pattern = re.compile(r"dragen/{s}/(?P<run>.*).bam".format(s=sample))
+pattern = re.compile(r'mapping/(?P<sample>[A-Za-z0-9_-]+)/(?P<flowcell>.+).bam')
 abam_dict = {}
 
-for infile in Path("dragen/{s}/".format(s=sample)).glob('*markdup*.bam'):
+for infile in Path(f"mapping/{sample}/").glob('*markdup*.bam'):
     match = pattern.search(str(infile))
     if match:
-        abam_dict[match.group('run')] = str(infile)
+        abam_dict[match.group('flowcell')] = str(infile)
 
 movies = list(abam_dict.keys())
 abams = list(abam_dict.values())

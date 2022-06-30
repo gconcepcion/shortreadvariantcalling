@@ -39,10 +39,10 @@ rule dragmap:
     """
 
 rule bwa:
-   input: "sbb_data/{sample}/{flowcell}_trimmed.fastq.gz"
+   input: "cutadapt/{sample}/{flowcell}_trimmed.fastq.gz"
    output: "mapping/{sample}/{flowcell}.bam"
    params:
-     readgroup="@RG\\tID:{id}\\tSM:{sample}\\tLB:{id}_{sample}\\tPL:sbb".format(id=id, sample=sample)   
+     readgroup=f"@RG\\tID:{id}\\tSM:{sample}\\tLB:{id}_{sample}\\tPL:sbb" 
    benchmark: "benchmarks/{sample}/dragen_{flowcell}.tsv"
    log: "logs/{sample}/bwa_{flowcell}.log"
    conda: "envs/bwa.yaml"

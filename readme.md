@@ -2,6 +2,14 @@ This is a snakemake workflow to run short read mapping and subsequent variant ca
 
 Choice of dragen or bwa for mapping algorithm.
 
+## Dependencies
+ - snakemake
+ - conda
+ - dragen
+ - bwa
+ - samtools
+ - 
+
 Create a directory for the analysis and clone this repo into it:
 ```git clone ...
 cd shortreadvariantcalling
@@ -22,6 +30,10 @@ vi config.yaml
 ```
 mkdir data/chm13
 ln -s /path/to/data/*.fastq.gz ./
+```
+### Initialize conda environments so there are no collisions when processing flowcells in parallel
+```
+snakemake -j 4 --conda-create-envs-only --use-conda --snakefile process_flowcell.smk mapping/chm13/XR0000000-BCC_L01_R1_Sample_Library_markdup.bam
 ```
 
 ### Process your input data by providing flowcell, sample name and number of requested cores for mapping
