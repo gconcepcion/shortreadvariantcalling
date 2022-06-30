@@ -1,0 +1,19 @@
+mapper: 'bwa'
+sample: "chm13_subset"
+datadir: "sbb_data"
+    
+flowcell_targets:
+  - alignment
+#  - stats  # req: alignment
+#  - coverage  # req: alignment
+#  - coverage_qc  # req: alignment
+#  - kmers
+
+sample_targets:
+  - variants
+#  - pbsv_vcf  # req: alignment in config['smrtcells_targets']
+#  - deepvariant  # req: alignment in config['smrtcells_targets']
+#  - whatshap  # req: deepvariant
+#  - coverage  # req: whatshapi
+#  - kmers  # req: kmers in config['smrtcells_targets']
+#  - tandem-genotypes  # req: whatshap
