@@ -7,29 +7,29 @@ Create a directory for the analysis and clone this repo into it:
 cd shortreadvariantcalling
 ```
 
-# Link your reference files
+### Link your reference files
 ```
 ln -s /path/to/reference ./
 ```
 
-# Edit your config.yaml & reference.yaml according to your layout
+### Edit your config.yaml & reference.yaml according to your layout
 ```
 vi reference.yaml
 vi config.yaml
 ```
 
-# Create directory for your input fastqs and copy or link the data
+### Create directory for your input fastqs and copy or link the data
 ```
 mkdir data/chm13
 ln -s /path/to/data/*.fastq.gz ./
 ```
 
-# Process your input data by providing flowcell, sample name and number of requested cores for mapping
+### Process your input data by providing flowcell, sample name and number of requested cores for mapping
 ```
 bash -ex process_flowcell.sh XR0000000-BCC_L01_R1_Sample_Library chm13 24
 ```
 
-# Next process samples by providing sample name and requested threads:
+### Next process samples by providing sample name and requested threads:
 ``` 
 bash -ex process_samples.sh chm13 24
 ```
