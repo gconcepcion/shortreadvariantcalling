@@ -1,0 +1,8 @@
+name: mosdepth
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - mosdepth=0.3.3=hdfd78af_1
+prefix: /home/UNIXHOME/gconcepcion/miniconda3/envs/mosdepth

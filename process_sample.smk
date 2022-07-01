@@ -6,6 +6,8 @@ configfile: "config.yaml"            # config options
 
 reffasta = config['ref']['fasta']
 sample = config['sample']
+qv = config['variantfilter']
+
 print(f"Reference: {reffasta}")
 print(f"Sample: {sample}")
 

@@ -6,6 +6,10 @@ module load snakemake/5.26.1
 flowcell=$1
 sample=$2
 threads=$3
-targetfile="mapping/${sample}/${flowcell}_markdup.bam"
+createenv=${4-false}
 
-snakemake --use-conda -j ${threads} -pr --snakefile process_flowcell.smk $targetfile
+if [ $createenv = true ] ; then
+    snakemake --conda-create-envs-only --use-conda -j ${threads} --snakefile process_flowcell.smk
+else
+    snakemake --config "flowcell=$flowcell" --use-conda -j ${threads} -pr --snakefile process_flowcell.smk
+fi

@@ -23,7 +23,7 @@ rule variantfilter:
   input: "gatk/{sample}/{flowcell}.raw.vcf.gz"
   output: "gatk/{sample}/{flowcell}.filtered.vcf.gz"
   params:
-    qual = "QUAL < 10.4139"
+    qual = f"QUAL < {qv}"
   log: "logs/{sample}/gatk_{flowcell}.log"
   conda: "envs/gatk.yaml"
   message: "Running gatk VariantFiltration with {threads} threads on {input}."
