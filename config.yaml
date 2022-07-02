@@ -11,7 +11,11 @@ flowcell_targets:
 
 sample_targets:
     - variants
-#  - pbsv_vcf  # req: alignment in config['smrtcells_targets']
+    - updateref
+    - filter
+    - coverage
+      #  -
+#  pbsv_vcf  # req: alignment in config['smrtcells_targets']
 #  - deepvariant  # req: alignment in config['smrtcells_targets']
 #  - whatshap  # req: deepvariant
 #  - coverage  # req: whatshapi
@@ -32,4 +36,7 @@ datadir: "sbb_data"
 adapter: "ATCGATTCGTGCTCGATGAACCGGGCGCTTA"
 
 #quality score for gatk VariantFiltration
-variantfilter: 10.4139
+dragenfilter: 10.4139
+
+#filter criteria for BWA
+bwafilter: 10
