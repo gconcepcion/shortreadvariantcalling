@@ -5,7 +5,6 @@ flowcell_targets:
     - alignment
     - markdups
     - mosdepth
-#  - coverage  # req: alignment
 #  - coverage_qc  # req: alignment
 #  - kmers
 
@@ -14,13 +13,6 @@ sample_targets:
     - updateref
     - filter
     - coverage
-      #  -
-#  pbsv_vcf  # req: alignment in config['smrtcells_targets']
-#  - deepvariant  # req: alignment in config['smrtcells_targets']
-#  - whatshap  # req: deepvariant
-#  - coverage  # req: whatshapi
-#  - kmers  # req: kmers in config['smrtcells_targets']
-#  - tandem-genotypes  # req: whatshap
 
 #choose mapping algorithm 'bwa' or 'dragen'
 #mapper: 'dragen'
@@ -30,7 +22,7 @@ mapper: 'bwa'
 sample: "chm13_subset"
 
 #directory where your data is stored / linked
-datadir: "sbb_data"
+datadir: "data"
 
 #adapter sequence for cutadapt
 adapter: "ATCGATTCGTGCTCGATGAACCGGGCGCTTA"

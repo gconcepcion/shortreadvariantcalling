@@ -1,9 +1,16 @@
 #!/bin/bash
-source /mnt/software/Modules/current/init/bash
 
-module load snakemake/5.26.1
+. "$HOME/miniconda3/etc/profile.d/conda.sh"
+conda activate shortreadvc
+source variables.env
 
-sample=$1
-threads=$2
 
-snakemake --verbose --use-conda -j $threads -pr --snakefile process_sample.smk
+threads=$1
+distributed=${2-false}
+
+if [ $distributed = false ]; then
+    snakemake --use-conda -j ${threads} -pr --snakefile process_sample.smk
+else
+    snakemake --verbose --profile profile/slurm --snakefile process_sample.smk
+fi 
+

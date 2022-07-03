@@ -1,0 +1,26 @@
+reason: true
+rerun-incomplete: true
+keep-going: true
+printshellcmds: true
+local-cores: 4
+max-threads: 256
+jobs: 500
+max-jobs-per-second: 1
+use-conda: true
+conda-frontend: mamba
+latency-wait: 120
+use-singularity: true
+singularity-args: '--nv '
+cluster: sbatch --account={resources.account}
+                --partition={resources.partition}
+                --cpus-per-task={threads}
+                --mem={resources.mem_mb}M
+                --output={resources.out} {resources.extra}
+default-resources:
+  - account='$ACCOUNT'
+  - partition='$PARTITION'
+  - tmpdir=system_tmpdir
+  - threads=1
+  - mem_mb=8000*threads
+  - out='cluster_logs/slurm-%x-%j-%N.out'
+  - extra=''

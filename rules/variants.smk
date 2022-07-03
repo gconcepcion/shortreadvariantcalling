@@ -1,7 +1,7 @@
 rule haplotypecaller:
     input:
         bams = abams
-    output: "gatk/{sample}/{sample}.raw.vcf.gz"
+    output: "sample/{sample}/gatk/{sample}.raw.vcf.gz"
     params:
         ref = reffasta,
         inbams = ' '.join([f"-I {i}" for i in abams])
@@ -16,13 +16,14 @@ rule haplotypecaller:
           --native-pair-hmm-threads {threads} \
           -R {params.ref} \
           {params.inbams} \
-          -O {output}
+          -O {output} \
+          2> {log}
         """
 
 rule aggregatecoverage:
     ### count total bases from all aligned bam files (mosdepth output)
-    input: expand(f"mapping/{sample}/mosdepth/{{flowcell}}.mosdepth.summary.txt", flowcell=flowcells)
-    output: "gatk/{sample}/{sample}.depthofcov.txt"
+    input: expand(f"sample/{sample}/mapping/mosdepth/{{flowcell}}.mosdepth.summary.txt", flowcell=flowcells)
+    output: "sample/{sample}/gatk/{sample}.depthofcov.txt"
     benchmark: "benchmarks/{sample}/{sample}_gatk_depthofcoverage.tsv"
     log: "logs/{sample}/{sample}_gatk_depthofcoverage.log"
     threads: 4
@@ -43,9 +44,9 @@ rule aggregatecoverage:
 
 
 rule selectsnps:
-    input: vcf = "gatk/{sample}/{sample}.raw.vcf.gz",
+    input: vcf = "sample/{sample}/gatk/{sample}.raw.vcf.gz",
            ref = f"{reffasta}"
-    output: "gatk/{sample}/{sample}.SNPs.vcf.gz"
+    output: "sample/{sample}/gatk/{sample}.SNPs.vcf.gz"
     params:
         filter = f"QUAL < {qual}"
     conda: "envs/gatk.yaml"
@@ -62,9 +63,9 @@ rule selectsnps:
         """
 
 rule selectindels:
-    input: vcf = "gatk/{sample}/{sample}.raw.vcf.gz",
+    input: vcf = "sample/{sample}/gatk/{sample}.raw.vcf.gz",
            ref = f"{reffasta}"
-    output: "gatk/{sample}/{sample}.INDELs.vcf.gz"
+    output: "sample/{sample}/gatk/{sample}.INDELs.vcf.gz"
     params:
         filter = f"QUAL < {qual}"
     conda: "envs/gatk.yaml"
@@ -81,8 +82,8 @@ rule selectindels:
         """
 
 rule variantfilterINDELs:
-    input: "gatk/{sample}/{sample}.INDELs.vcf.gz"
-    output: "gatk/{sample}/{sample}.INDELs.filtered.vcf.gz"
+    input: "sample/{sample}/gatk/{sample}.INDELs.vcf.gz"
+    output: "sample/{sample}/gatk/{sample}.INDELs.filtered.vcf.gz"
     params:
         qual = f"QUAL < {qual}"
     log: "logs/{sample}/gatk_INDELs_{sample}.log"
@@ -99,8 +100,8 @@ rule variantfilterINDELs:
         """
 
 rule variantfilterSNPs:
-    input: "gatk/{sample}/{sample}.SNPs.vcf.gz"
-    output: "gatk/{sample}/{sample}.SNPs.filtered.vcf.gz"
+    input: "sample/{sample}/gatk/{sample}.SNPs.vcf.gz"
+    output: "sample/{sample}/gatk/{sample}.SNPs.filtered.vcf.gz"
     params:
         qual = f"QUAL < {qual}"
     log: "logs/{sample}/gatk_SNPs_{sample}.log"
@@ -117,9 +118,9 @@ rule variantfilterSNPs:
         """
 
 rule updatereference:
-    input: vcf = "gatk/{sample}/{sample}.INDELs.vcf.gz",
+    input: vcf = "sample/{sample}/gatk/{sample}.INDELs.vcf.gz",
            ref = f"{reffasta}"
-    output: "gatk/{sample}/{refbase}_updated.fasta"
+    output: "sample/{sample}/gatk/{refbase}_updated.fasta"
     conda: "envs/gatk.yaml"
     log: "logs/{sample}/gatk_{refbase}_updatedref_{sample}.log"
     message: "Updating reference with new variants from {input}."

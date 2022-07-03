@@ -7,8 +7,8 @@ else:
 
 
 rule cutadapt:
-    input: "sbb_data/{sample}/{flowcell}.fastq.gz"
-    output: "cutadapt/{sample}/{flowcell}_trimmed.fastq.gz"
+    input: f"data/{sample}/{{flowcell}}.fastq.gz"
+    output: "sample/{sample}/cutadapt/{flowcell}_trimmed.fastq.gz"
     benchmark: "benchmarks/{sample}/cutadapt_{flowcell}.tsv"
     log: "logs/{sample}/cutadapt_{flowcell}.log"
     conda: "envs/cutadapt.yaml"
@@ -20,8 +20,8 @@ rule cutadapt:
         """
 
 rule dragmap:
-    input: "cutadapt/{sample}/{flowcell}_trimmed.fastq.gz"
-    output: "mapping/{sample}/{flowcell}.bam"
+    input: "sample/{sample}/cutadapt/{flowcell}_trimmed.fastq.gz"
+    output: "sample/{sample}/mapping/{flowcell}.bam"
     params:
         refdict = "reference/"
     benchmark: "benchmarks/{sample}/dragen_{flowcell}.tsv"
@@ -43,8 +43,8 @@ rule dragmap:
         """
 
 rule bwa:
-    input: "cutadapt/{sample}/{flowcell}_trimmed.fastq.gz"
-    output: "mapping/{sample}/{flowcell}.bam"
+    input: "sample/{sample}/cutadapt/{flowcell}_trimmed.fastq.gz"
+    output: "sample/{sample}/mapping/{flowcell}.bam"
     params:
         readgroup = "@RG\\tID:{flowcell}\\tSM:{sample}\\tLB:{flowcell}_{sample}\\tPL:sbb"
     benchmark: "benchmarks/{sample}/dragen_{flowcell}.tsv"
@@ -63,10 +63,10 @@ rule bwa:
         """
 
 rule markduplicates:
-    input: "mapping/{sample}/{flowcell}.bam"
-    output: bam = "mapping/{sample}/{flowcell}_markdup.bam", bai = "mapping/{sample}/{flowcell}_markdup.bam.bai"
+    input: "sample/{sample}/mapping/{flowcell}.bam"
+    output: bam = "sample/{sample}/mapping/{flowcell}_markdup.bam", bai = "sample/{sample}/mapping/{flowcell}_markdup.bam.bai"
     params:
-        metrics_out = "mapping/{sample}/marked_dup_metrics_{flowcell}.txt"
+        metrics_out = "sample/{sample}/mapping/marked_dup_metrics_{flowcell}.txt"
     benchmark: "benchmarks/{sample}/mark_dups_{flowcell}.tsv"
     log: "logs/{sample}/markdups_{flowcell}.log"
     conda: "envs/gatk.yaml"
@@ -76,24 +76,25 @@ rule markduplicates:
         """
         gatk MarkDuplicatesSpark \
                     --conf "spark.executor.cores={threads}" \
-                    --tmp-dir {temp} \
+                    --tmp-dir $TMPDIR \
                     --input {input} \
                     --output {output.bam} \
-                    -M {params.metrics_out}
+                    -M {params.metrics_out} \
+                    2> {log}
         """
 
 rule mosdepth:
-    input: "mapping/{sample}/{flowcell}_markdup.bam"
+    input: "sample/{sample}/mapping/{flowcell}_markdup.bam"
     output:
-        "mapping/{sample}/mosdepth/{flowcell}_markdup.mosdepth.global.dist.txt",
-        "mapping/{sample}/mosdepth/{flowcell}_markdup.mosdepth.region.dist.txt",
-        "mapping/{sample}/mosdepth/{flowcell}_markdup.mosdepth.summary.txt",
-        "mapping/{sample}/mosdepth/{flowcell}_markdup.regions.bed.gz"
-    log: "logs/{sample}/mosdepth/{flowcell}.log"
+        "sample/{sample}/mapping/mosdepth/{flowcell}_markdup.mosdepth.global.dist.txt",
+        "sample/{sample}/mapping/mosdepth/{flowcell}_markdup.mosdepth.region.dist.txt",
+        "sample/{sample}/mapping/mosdepth/{flowcell}_markdup.mosdepth.summary.txt",
+        "sample/{sample}/mapping/mosdepth/{flowcell}_markdup.regions.bed.gz"
+    log: "logs/{sample}/mosdepth/{flowcell}_mosdepth.log"
     benchmark: "benchmarks/{sample}/mosdepth/{flowcell}.tsv"
     params:
         by = "500",
-        flowcell = "mapping/{sample}/mosdepth/{flowcell}_markdup",
+        flowcell = "sample/{sample}/mapping/mosdepth/{flowcell}_markdup",
         extra = "--no-per-base --use-median"
     threads: 4
     conda: "envs/mosdepth.yaml"
@@ -105,9 +106,9 @@ rule mosdepth:
         """
 
 rule seqtkfqchk:
-    input: "cutadapt/{sample}/{flowcell}_trimmed.fastq.gz"
-    output: "cutadapt/{sample}/seqtk/{flowcell}_seqtkfqchk.txt"
-    log: "logs/{sample}/seqtk/{flowcell}.log"
+    input: "sample/{sample}/cutadapt/{flowcell}_trimmed.fastq.gz"
+    output: "sample/{sample}/cutadapt/seqtk/{flowcell}_seqtkfqchk.txt"
+    log: "logs/{sample}/seqtk/{flowcell}_seqtk.log"
     benchmark: "benchmarks/{sample}/seqtk/{flowcell}.tsv"
     params:
         qfilter = 20  # 20 is program default
@@ -120,8 +121,8 @@ rule seqtkfqchk:
         """
 
 rule seqtkfqchkplot:
-    input: "cutadapt/{sample}/seqtk/{flowcell}_seqtkfqchk.txt"
-    output: "cutadapt/{sample}/seqtk/{flowcell}_seqtkfqchk.txt.png"
+    input: "sample/{sample}/cutadapt/seqtk/{flowcell}_seqtkfqchk.txt"
+    output: "sample/{sample}/cutadapt/seqtk/{flowcell}_seqtkfqchk.txt.png"
     log: "logs/{sample}/seqtk/{flowcell}_plot.log"
     params:
         qfilter = 20  # 20 is program default
