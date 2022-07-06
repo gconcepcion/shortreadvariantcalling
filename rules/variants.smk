@@ -4,7 +4,8 @@ rule haplotypecaller:
     output: "sample/{sample}/gatk/{sample}.raw.vcf.gz"
     params:
         ref = reffasta,
-        inbams = ' '.join([f"-I {i}" for i in abams])
+        inbams = ' '.join([f"-I {i}" for i in abams]),
+        minmapq = {minmapq}
     benchmark: "benchmarks/{sample}/gatk_{sample}.tsv"
     log: "logs/{sample}/gatk_{sample}.log"
     conda: "envs/gatk.yaml"
@@ -14,6 +15,7 @@ rule haplotypecaller:
         """
         gatk --java-options "-Xmx4g" HaplotypeCaller \
           --native-pair-hmm-threads {threads} \
+          --minimum-mapping-quality {params.minmapq} \
           -R {params.ref} \
           {params.inbams} \
           -O {output} \
@@ -27,7 +29,7 @@ rule aggregatecoverage:
     benchmark: "benchmarks/{sample}/{sample}_gatk_depthofcoverage.tsv"
     log: "logs/{sample}/{sample}_gatk_depthofcoverage.log"
     threads: 4
-    message: "Running DepthOfCoverage with {threads} threads on {input}."
+    message: "Aggregating flowcell coverage"
     run:
         totals = []
         with open(f"{output}", "w+") as o:
@@ -81,49 +83,13 @@ rule selectindels:
             2> {log}
         """
 
-rule variantfilterINDELs:
-    input: "sample/{sample}/gatk/{sample}.INDELs.vcf.gz"
-    output: "sample/{sample}/gatk/{sample}.INDELs.filtered.vcf.gz"
-    params:
-        qual = f"QUAL < {qual}"
-    log: "logs/{sample}/gatk_INDELs_{sample}.log"
-    conda: "envs/gatk.yaml"
-    message: "Running gatk VariantFiltration with {threads} threads on {input}."
-    shell:
-        """
-        gatk VariantFiltration \
-            -V {input} \
-            --filter-expression "{params.qual}" \
-            --filter-name "QUALFilter" \
-            -O {output} \
-            2> {log}
-        """
-
-rule variantfilterSNPs:
-    input: "sample/{sample}/gatk/{sample}.SNPs.vcf.gz"
-    output: "sample/{sample}/gatk/{sample}.SNPs.filtered.vcf.gz"
-    params:
-        qual = f"QUAL < {qual}"
-    log: "logs/{sample}/gatk_SNPs_{sample}.log"
-    conda: "envs/gatk.yaml"
-    message: "Running gatk VariantFiltration with {threads} threads on {input}."
-    shell:
-        """
-        gatk VariantFiltration \
-            -V {input} \
-            --filter-expression "{params.qual}" \
-            --filter-name "QUALFilter" \
-            -O {output} \
-            2> {log}
-        """
-
 rule updatereference:
     input: vcf = "sample/{sample}/gatk/{sample}.INDELs.vcf.gz",
            ref = f"{reffasta}"
     output: "sample/{sample}/gatk/{refbase}_updated.fasta"
     conda: "envs/gatk.yaml"
     log: "logs/{sample}/gatk_{refbase}_updatedref_{sample}.log"
-    message: "Updating reference with new variants from {input}."
+    message: "Updating reference with INDEL variants from {input}."
     shell:
         """
         gatk FastaAlternateReferenceMaker \
@@ -132,3 +98,36 @@ rule updatereference:
            -V {input.vcf} \
            2> {log}
         """
+
+rule updatereferenceSNPs:
+    input: vcf = "sample/{sample}/gatk/{sample}.SNPs.vcf.gz",
+           ref = f"{reffasta}"
+    output: "sample/{sample}/gatk/{refbase}_SNPsupdated.fasta"
+    conda: "envs/gatk.yaml"
+    log: "logs/{sample}/gatk_{refbase}_SNPsupdatedref_{sample}.log"
+    message: "Updating reference with new SNP variants from {input}."
+    shell:
+        """
+        gatk FastaAlternateReferenceMaker \
+           -R {input.ref} \
+           -O {output} \
+           -V {input.vcf} \
+           2> {log}
+        """
+
+rule updatereferenceALL:
+    input: vcf = "sample/{sample}/gatk/{sample}.raw.vcf.gz",
+           ref = f"{reffasta}"
+    output: "sample/{sample}/gatk/{refbase}_ALLupdated.fasta"
+    conda: "envs/gatk.yaml"
+    log: "logs/{sample}/gatk_{refbase}_ALLupdatedref_{sample}.log"
+    message: "Updating reference with all variants from {input}."
+    shell:
+        """
+        gatk FastaAlternateReferenceMaker \
+           -R {input.ref} \
+           -O {output} \
+           -V {input.vcf} \
+           2> {log}
+        """
+

@@ -46,7 +46,7 @@ rule bwa:
     input: "sample/{sample}/cutadapt/{flowcell}_trimmed.fastq.gz"
     output: "sample/{sample}/mapping/{flowcell}.bam"
     params:
-        readgroup = "@RG\\tID:{flowcell}\\tSM:{sample}\\tLB:{flowcell}_{sample}\\tPL:sbb"
+        readgroup = "@RG\\tID:{flowcell}\\tSM:{sample}\\tPL:OMN"
     benchmark: "benchmarks/{sample}/dragen_{flowcell}.tsv"
     log: "logs/{sample}/bwa_{flowcell}.log"
     conda: "envs/bwa.yaml"

@@ -1,4 +1,5 @@
 import os
+import re
 
 configfile: "reference.yaml"         # reference configuration
 configfile: "config.yaml"         # reference configuration
@@ -8,7 +9,6 @@ sample = config['sample']
 adapter = config['adapter']
 datadir = config['datadir']
 
-id = 1
 ref = config['ref']['shortname']
 refdict = config['ref']['dict']
 reffasta = config['ref']['fasta']
@@ -19,9 +19,12 @@ print(f"Processing flowcells for Sample: {sample}")
 targets = []
 
 fastqs = list(Path(f"{datadir}/{sample}").glob("*.fastq.gz"))
-flowcells = [str(os.path.basename(i)).rsplit(".", 2)[0] for i in fastqs]
+print(fastqs)
 
-#targets.extend(fastqs)
+### example flowcell name format: FB0026100-BCC_L02_R1
+flowcell = re.compile(r'([A-Z][A-Z]\d+.*L\d+_R\d.*subset)')
+flowcells = [flowcell.search(str(x)).group() for x in fastqs]
+print(flowcells)
 
 # align reads with dragmap and markduplicates with gatk
 include: 'rules/alignment.smk'

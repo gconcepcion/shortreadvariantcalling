@@ -6,10 +6,9 @@ umask 002
 conda activate shortreadvc
 source variables.env
 
-threads=$1
-distributed=${2-false}
-createenv=${3-false}
-statuspy="profile/slurm/status.py"
+distributed=${1:-false}
+threads=${2:-6}
+createenv=${3:-false}
 
 if [ $createenv = true ] ; then
     snakemake --conda-create-envs-only --conda-frontend mamba --use-conda -j ${threads} --snakefile process_flowcells.smk
@@ -17,6 +16,6 @@ else
     if [ $distributed = false ]; then
         snakemake --use-conda -j ${threads} -pr --snakefile process_flowcells.smk
     else
-        snakemake --verbose --profile profile/slurm --snakefile process_flowcells.smk
+        snakemake --profile profile/slurm --snakefile process_flowcells.smk
     fi 
 fi

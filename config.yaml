@@ -32,3 +32,6 @@ dragenfilter: 10.4139
 
 #filter criteria for BWA
 bwafilter: 10
+
+#gatk defaults
+minmapq: 60

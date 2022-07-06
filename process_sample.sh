@@ -5,8 +5,8 @@ conda activate shortreadvc
 source variables.env
 
 
-threads=$1
-distributed=${2-false}
+distributed=${1:-false}
+threads=${2:-6}
 
 if [ $distributed = false ]; then
     snakemake --use-conda -j ${threads} -pr --snakefile process_sample.smk
