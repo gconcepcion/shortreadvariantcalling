@@ -21,8 +21,8 @@ fastqs = list(Path(f"{datadir}/{sample}").glob("*.fastq.gz"))
 print(fastqs)
 
 ### example flowcell name format: FB0026100-BCC_L02_R1
-flowcell = re.compile(r'([A-Z][A-Z]\d+.*L\d+_R\d.*subset)')
-flowcells = [flowcell.search(str(x)).group() for x in fastqs]
+flowcell = re.compile(r'([A-Z][A-Z]\d+.*L\d+_R\d.*).bam')
+flowcells = [flowcell.search(str(x)).group(1) for x in fastqs]
 print(flowcells)
 
 # align reads with dragmap and markduplicates with gatk
