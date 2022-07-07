@@ -1,11 +1,11 @@
 # chm13
 ref:
   shortname: 'chm13'
-  fasta: 'reference/human_chm13v2.0_maskedY_rCRS.fasta'
-  index: 'reference/human_chm13v2.0_maskedY_rCRS.fasta.fai'
-  dict: 'reference/human_chm13v2.0_maskedY_rCRS.dict'
-  bwa: 'reference/human_chm13v2.0_maskedY_rCRS.fasta.bwt'
-  chr_lengths: 'reference/human_chm13v2.0_maskedY_rCRS.chr_lengths.txt'
+  fasta: 'reference/chm13v2.0_noY.fa'
+  index: 'reference/chm13v2.0_noY.fa.fai'
+  intervallist: 'reference/chm13v2.0_noY.list'
+  dict: 'reference/chm13v2.0_noY.dict'
+  bwa: 'reference/chm13v2.0_noY.fa.bwa'
   autosomes: ['chr1', 'chr2', 'chr3', 'chr4', 'chr5',
               'chr6', 'chr7', 'chr8', 'chr9', 'chr10',
               'chr11', 'chr12', 'chr13', 'chr14', 'chr15',

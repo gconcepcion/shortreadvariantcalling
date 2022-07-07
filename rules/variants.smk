@@ -5,7 +5,9 @@ rule haplotypecaller:
     params:
         ref = reffasta,
         inbams = ' '.join([f"-I {i}" for i in abams]),
-        minmapq = {minmapq}
+        minmapq = {minmapq},
+        ploidy = config['ploidy'],
+        intervals = intervals
     benchmark: "benchmarks/{sample}/gatk_{sample}.tsv"
     log: "logs/{sample}/gatk_{sample}.log"
     conda: "envs/gatk.yaml"
@@ -16,6 +18,8 @@ rule haplotypecaller:
         gatk --java-options "-Xmx4g" HaplotypeCaller \
           --native-pair-hmm-threads {threads} \
           --minimum-mapping-quality {params.minmapq} \
+          --ploidy {params.ploidy} \
+          --intervals {params.intervals} \
           -R {params.ref} \
           {params.inbams} \
           -O {output} \
@@ -24,7 +28,7 @@ rule haplotypecaller:
 
 rule aggregatecoverage:
     ### count total bases from all aligned bam files (mosdepth output)
-    input: expand(f"sample/{sample}/mapping/mosdepth/{{flowcell}}.mosdepth.summary.txt", flowcell=flowcells)
+    input: expand(f"sample/{sample}/mapping/mosdepth/{{flowcell}}_markdup.mosdepth.summary.txt", flowcell=flowcells)
     output: "sample/{sample}/gatk/{sample}.depthofcov.txt"
     benchmark: "benchmarks/{sample}/{sample}_gatk_depthofcoverage.tsv"
     log: "logs/{sample}/{sample}_gatk_depthofcoverage.log"
@@ -129,5 +133,22 @@ rule updatereferenceALL:
            -O {output} \
            -V {input.vcf} \
            2> {log}
+        """
+
+rule selectHQindels:
+    input: vcf = "sample/{sample}/gatk/{sample}.INDELs.vcf.gz"
+    output: "sample/{sample}/gatk/{sample}.HQ.INDELs.vcf.gz"
+    params:
+        filter = f"QD<{qdfilter}"
+    conda: "envs/gatk.yaml"
+    log: "logs/{sample}/gatk_extractsnps_{sample}.log"
+    message: "Extracting INDELs from {input}"
+    shell:
+        """
+        gatk VariantFiltration \
+            -V {input.vcf} \
+            --filterExpression {params.filter} \
+            -O {output} \
+            2> {log}
         """
 

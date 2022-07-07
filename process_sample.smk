@@ -8,6 +8,7 @@ refbase = Path(reffasta).stem
 sample = config['sample']
 qual = config['bwafilter']
 minmapq = config['minmapq']
+qdfilter = config['qdfilter']
 
 print(f"Reference: {reffasta}")
 print(f"Sample: {sample}")
@@ -18,10 +19,12 @@ abams = list(Path(f"sample/{sample}/mapping").glob("*_markdup.bam"))
 abam_paths = [i.as_posix() for i in abams]
 mosdepthout = [os.path.splitext(i)[0] + ".mosdepth.summary.txt" for i in abam_paths]
 
-flowcell = re.compile(r'([A-Z][A-Z]\d+.*L\d+_R\d.*subset)')
-flowcells = [flowcell.search(str(x)).group() for x in abams]
+flowcell = re.compile(r'([A-Z][A-Z]\d+.*L\d+_R\d.*).bam')
+flowcells = [flowcell.search(str(x)).group(1) for x in abams]
 
 print(f"Using the following movies: {flowcells}")
+#ints = ",".join(config['ref']['autosomes'])
+intervals = config['ref']['intervallist']
 
 include: 'rules/variants.smk'
 # Call variants from bams

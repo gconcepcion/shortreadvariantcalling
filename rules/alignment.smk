@@ -10,13 +10,15 @@ rule cutadapt:
     input: f"data/{sample}/{{flowcell}}.fastq.gz"
     output: "sample/{sample}/cutadapt/{flowcell}_trimmed.fastq.gz"
     benchmark: "benchmarks/{sample}/cutadapt_{flowcell}.tsv"
+    params:
+        adapter = adapter
     log: "logs/{sample}/cutadapt_{flowcell}.log"
     conda: "envs/cutadapt.yaml"
     threads: 24
     message: "Running cutadapt with {threads} threads on {input}."
     shell:
         """
-        cutadapt --cores {threads} -a {adapter} --overlap 8 -o {output} {input} > {log} 2>&1
+        cutadapt --cores {threads} -a {params.adapter} --overlap 8 -o {output} {input} > {log} 2>&1
         """
 
 rule dragmap:
@@ -44,9 +46,10 @@ rule dragmap:
 
 rule bwa:
     input: "sample/{sample}/cutadapt/{flowcell}_trimmed.fastq.gz"
-    output: "sample/{sample}/mapping/{flowcell}.bam"
+    output: temp("sample/{sample}/mapping/{flowcell}.bam")
     params:
-        readgroup = "@RG\\tID:{flowcell}\\tSM:{sample}\\tPL:OMN"
+        readgroup = "@RG\\tID:{flowcell}\\tSM:{sample}\\tPL:OMN",
+        ref = reffasta
     benchmark: "benchmarks/{sample}/dragen_{flowcell}.tsv"
     log: "logs/{sample}/bwa_{flowcell}.log"
     conda: "envs/bwa.yaml"
@@ -56,7 +59,7 @@ rule bwa:
         """
         bwa mem -R "{params.readgroup}" \
                 -t {threads} \
-                {reffasta} \
+                {params.ref} \
                 {input} | \
                 samtools sort -@{threads} \
                               -o {output} -   
@@ -133,3 +136,46 @@ rule seqtkfqchkplot:
         """
         python scripts/plots.py {input} 2> {log}      
         """
+
+## IndelRealignment not necessary nor possible in gatk4
+## https://www.biostars.org/p/9502075/
+
+#rule realignertargets:
+#    input: "sample/{sample}/mapping/{flowcell}_markdup.bam"
+#    output: bam = "sample/{sample}/mapping/{flowcell}.intervals"
+#    params:
+#        ref = reffasta
+#    benchmark: "benchmarks/{sample}/mark_dups_{flowcell}.tsv"
+#    log: "logs/{sample}/{flowcell}_intervals.log"
+#    conda: "envs/gatk.yaml"
+#    threads: 24
+#    message: "Running gatk MarkDuplicatesSpark with {threads} threads on {input}."
+#    shell:
+#        """
+#        gatk RealignerTargetCreator \
+#                    -R {params.ref} \
+#                    -I {input} \
+#                    -O {output} \
+#                    2> {log}
+#        """
+
+#rule indelrealigner:
+#    input: bam="sample/{sample}/mapping/{flowcell}_markdup.bam",intervals="sample/{sample}/mapping/{flowcell}.intervals"
+#    output: bam = "sample/{sample}/mapping/{flowcell}.realigned.bam"
+#    params:
+#        ref = reffasta
+#    benchmark: "benchmarks/{sample}/mark_dups_{flowcell}.tsv"
+#    log: "logs/{sample}/{flowcell}_intervals.log"
+#    conda: "envs/gatk.yaml"
+#    threads: 24
+#    message: "Running gatk MarkDuplicatesSpark with {threads} threads on {input}."
+#    shell:
+#        """
+#        gatk IndelRealigner \
+#                    -R {params.ref} \
+#                    -I {input.bam} \
+#                    -target Intervals \
+#                    {input.intervals} \
+#                    -O {output} \
+#                    2> {log}
+#        """

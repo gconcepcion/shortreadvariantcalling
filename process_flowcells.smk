@@ -13,7 +13,6 @@ ref = config['ref']['shortname']
 refdict = config['ref']['dict']
 reffasta = config['ref']['fasta']
 
-
 print(f"Processing flowcells for Sample: {sample}")
 
 targets = []
@@ -43,6 +42,10 @@ if 'alignment' in config['flowcell_targets']:
 if 'markdups' in config['flowcell_targets']:
     targets.extend(
         [f"sample/{sample}/mapping/{flowcell}_markdup.{suffix}" for suffix in ['bam', 'bam.bai'] for flowcell in flowcells])
+
+if 'realignment' in config['flowcell_targets']:
+    targets.extend([f"sample/{sample}/mapping/{flowcell}.intervals" for flowcell in flowcells])
+    targets.extend([f"sample/{sample}/mapping/{flowcell}.realigned.bam" for flowcell in flowcells])
 
 if 'mosdepth' in config['flowcell_targets']:
     targets.extend([f"sample/{sample}/mapping/mosdepth/{flowcell}_markdup.{suffix}" for suffix in ['mosdepth.global.dist.txt',
