@@ -43,10 +43,6 @@ if 'markdups' in config['flowcell_targets']:
     targets.extend(
         [f"sample/{sample}/mapping/{flowcell}_markdup.{suffix}" for suffix in ['bam', 'bam.bai'] for flowcell in flowcells])
 
-if 'realignment' in config['flowcell_targets']:
-    targets.extend([f"sample/{sample}/mapping/{flowcell}.intervals" for flowcell in flowcells])
-    targets.extend([f"sample/{sample}/mapping/{flowcell}.realigned.bam" for flowcell in flowcells])
-
 if 'mosdepth' in config['flowcell_targets']:
     targets.extend([f"sample/{sample}/mapping/mosdepth/{flowcell}_markdup.{suffix}" for suffix in ['mosdepth.global.dist.txt',
                                                                                     'mosdepth.region.dist.txt',

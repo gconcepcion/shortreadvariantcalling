@@ -4,7 +4,6 @@ flowcell_targets:
     - seqtkplots
     - alignment
     - markdups
-    - realignment
     - mosdepth
 #  - coverage_qc  # req: alignment
 #  - kmers
@@ -20,7 +19,7 @@ sample_targets:
 mapper: 'bwa'
 
 #specify sample name
-sample: "chm13"
+sample: "chm13_subset"
 ploidy: 1
 #directory where your data is stored / linked
 datadir: "data"
