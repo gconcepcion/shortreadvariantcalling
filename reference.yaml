@@ -3,6 +3,7 @@ ref:
   shortname: 'chm13'
   fasta: 'reference/chm13v2.0_noY.fa'
   index: 'reference/chm13v2.0_noY.fa.fai'
+  length: '3054832041'
   intervallist: 'reference/chm13v2.0_noY.list'
   dict: 'reference/chm13v2.0_noY.dict'
   bwa: 'reference/chm13v2.0_noY.fa.bwa'

@@ -10,10 +10,10 @@ flowcell_targets:
 
 sample_targets:
     - variants
-    - updateref
+      #    - updateref
     - filter
     - coverage
-
+    - accuracy
 #choose mapping algorithm 'bwa' or 'dragen'
 #mapper: 'dragen'
 mapper: 'bwa'

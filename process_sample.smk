@@ -4,6 +4,7 @@ configfile: "reference.yaml"         # reference configuration
 configfile: "config.yaml"            # config options
 
 reffasta = config['ref']['fasta']
+reflen = config['ref']['length']
 refbase = Path(reffasta).stem
 sample = config['sample']
 qual = config['bwafilter']
@@ -34,6 +35,9 @@ if 'variants' in config['sample_targets']:
 
 if 'coverage' in config['sample_targets']:
     targets.extend([f"sample/{sample}/gatk/{sample}.depthofcov.txt"])
+
+if 'accuracy' in config['sample_targets']:
+    targets.extend([f"sample/{sample}/gatk/{sample}.acc"])
 
 if 'filter' in config['sample_targets']:
     targets.extend([f"sample/{sample}/gatk/{sample}.SNPs.vcf.gz"])

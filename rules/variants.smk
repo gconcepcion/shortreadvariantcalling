@@ -28,7 +28,7 @@ rule haplotypecaller:
 
 rule aggregatecoverage:
     ### count total bases from all aligned bam files (mosdepth output)
-    input: expand(f"sample/{sample}/mapping/mosdepth/{{flowcell}}_markdup.mosdepth.summary.txt", flowcell=flowcells)
+    input: expand(f"sample/{sample}/mapping/mosdepth/{{flowcell}}.mosdepth.summary.txt", flowcell=flowcells)
     output: "sample/{sample}/gatk/{sample}.depthofcov.txt"
     benchmark: "benchmarks/{sample}/{sample}_gatk_depthofcoverage.tsv"
     log: "logs/{sample}/{sample}_gatk_depthofcoverage.log"
@@ -152,3 +152,30 @@ rule selectHQindels:
             2> {log}
         """
 
+rule sampleaccuracy:
+    input: 
+        rawvcf = 'sample/{sample}/gatk/{sample}.raw.vcf.gz',
+        snpvcf = 'sample/{sample}/gatk/{sample}.SNPs.vcf.gz',
+        indelvcf = 'sample/{sample}/gatk/{sample}.INDELs.vcf.gz'
+    output: "sample/{sample}/gatk/{sample}.acc"
+    params: 
+        reflen = reflen
+    log: "logs/{sample}/{sample}_accuracy.log"
+    message: "Calculate overall accuracy (QV) from {input}"
+    run:
+        import gzip
+        import math
+
+        with open(f"{output}", 'w+') as o:
+            for vcf in [input.snpvcf, input.indelvcf, input.rawvcf]:
+
+                with gzip.open(vcf, 'rb') as i:
+                    contents = i.read().splitlines()
+                variantdata = []
+                for line in contents:
+                    if not line.startswith(b'#'):
+                        variantdata.append(line)   
+                errors = len(variantdata)
+                pcalled = errors / int(params.reflen)
+                qv = -10 * math.log10(pcalled)
+                o.write(f"{vcf}\t{qv}\t{pcalled}\n")   
